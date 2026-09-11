@@ -11,8 +11,10 @@ const getEmployees = async (req , res) => {
             `select *
                 from
                 public.employee_one
+                Where is_deleted = false
                 order by
-                employee_id`
+                employee_id
+                `
         )
         
         console.log("API Result======>",result)
@@ -125,8 +127,168 @@ const createEmployee = async (req , res) => {
 }    
 
 
+const updateEmployee = async (req, res) =>{
+
+    try{
+
+        const {id} = req.params
+
+         const {
+            employee_code,
+            first_name,
+            last_name,
+            email,
+            phone,
+            designation,
+            department,
+            date_of_joining,
+            salary} = req.body;
+
+            const result = await pool.query(
+                `Update public.employee_one
+                SET
+                    employee_code = $1,
+                    first_name = $2,
+                    last_name = $3,
+                    email = $4,
+                    phone = $5,
+                    designation =$6,
+                    department = $7,
+                    date_of_joining = $8,
+                    salary = $9
+
+                    where employee_id = $10
+                    RETURNING *
+                `,[
+                    employee_code,
+                    first_name,
+                    last_name,
+                    email,
+                    phone,
+                    designation,
+                    department,
+                    date_of_joining,
+                    salary,
+                    id
+                ]
+            )
+
+
+
+            if(result.rows.length === 0){
+                return res.status(404).json({
+                    message:"Employee not Found"
+                })
+            }
+
+
+
+            res.status(200).json(result.rows[0])
+
+
+    }   
+    catch(error){
+
+        console.log('error=======>',error)
+        res.status(500).json({
+            message:"Failed to update employee"
+        })
+    }
+}
+
+const patchEmployee = async (req, res) =>{
+    
+    try{
+        const {id} = req.params;
+
+        const {
+            
+            email,
+            phone,
+            designation,
+            department,
+            date_of_joining,
+            salary} = req.body;
+
+         const result = await pool.query(
+            `Update public.employee_one
+             SET
+                email = COALESCE($1,email),   
+                phone = $2,  
+                designation = COALESCE($3,designation),
+                department = COALESCE($4,department),    
+                date_of_joining = COALESCE($5,date_of_joining),                         
+                salary = COALESCE($6,salary)
+                where employee_id = $7
+                RETURNING *
+            `,[
+                email,
+                phone,
+                designation,
+                department,
+                date_of_joining,
+                salary,
+                id
+            ]
+         )   
+
+           if(result.rows.length === 0){
+                return res.status(404).json({
+                    message:"Employee not Found"
+                })
+            }
+
+
+
+            res.status(200).json(result.rows[0])
+
+    }
+    catch(error){
+
+        console.log('error=======>',error)
+        res.status(500).json({
+            message:"Failed to update employee"
+        })
+    }
+}
+
+
+const deleteEmployee = async (req ,res) =>{
+    
+    try{
+        
+        const {id} = req.params;
+
+        const result = await pool.query(
+            `UPDATE public.employee_one
+            SET is_deleted = true WHERE employee_id = $1
+            RETURNING *`,
+            [id]
+        );
+
+        if(result.rows.length === 0){
+            return res.status(404).json({
+                message:"Employee not found"
+            })
+        }
+
+        res.status(200).json({
+            message:"Employee deleted successfully",
+            employee:result.rows[0]
+        })
+
+
+    }
+    catch(error){
+
+    }
+}
+
 module.exports = {
     getEmployees,
     getEmployeesById,
-    createEmployee 
+    createEmployee,
+    updateEmployee ,
+    patchEmployee,
+    deleteEmployee
 }
