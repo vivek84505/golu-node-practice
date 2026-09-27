@@ -37,6 +37,7 @@ const getEmployees = async (req , res) => {
 
 const getEmployeesById = async(req, res) => {
 
+    console.log("req.params========>",req.params)
     const {id} = req.params;
     
     try{
@@ -214,7 +215,7 @@ const patchEmployee = async (req, res) =>{
             `Update public.employee_one
              SET
                 email = COALESCE($1,email),   
-                phone = $2,  
+                phone = COALESCE($2,phone),     
                 designation = COALESCE($3,designation),
                 department = COALESCE($4,department),    
                 date_of_joining = COALESCE($5,date_of_joining),                         
