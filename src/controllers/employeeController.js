@@ -4,6 +4,12 @@ const pool = require("../db/database")
 
 const getEmployees = async (req , res) => {
     
+     response = {
+        status : "",
+        message : "",
+        data:[]
+    }
+   
     
     try{
 
@@ -12,6 +18,7 @@ const getEmployees = async (req , res) => {
                 from
                 public.employee_one
                 Where is_deleted = false
+              --  and employee_code = '777'
                 order by
                 employee_id
                 `
@@ -19,17 +26,31 @@ const getEmployees = async (req , res) => {
         
         console.log("API Result======>",result)
         
+        if (result.rows.length > 0 ){
 
-        res.status(200).json(result.rows)
+                response.status = "sucessfull";
+                response.message = "Data Fetched Sucesfully"
+                response.data = result.rows
+                res.status(200).json(response)
+
+        }
+        else{
+
+                response.status = "sucessfull";
+                response.message = "No Data Found"
+                response.data = result.rows
+                res.status(200).json(response)
+
+        }
+        
  
 
     }
     catch(error){
 
-        console.log("Error ===========>",error)
-        res.status(500).json({
-            message:"Internal Server Error"
-        })
+                response.status = "fail";
+                response.message = "Something went wrong"              
+                res.status(200).json(response)
     }
 
 
@@ -72,6 +93,11 @@ const getEmployeesById = async(req, res) => {
 
 const createEmployee = async (req , res) => {
 
+    response = {
+        status : "",
+        message : "",
+        data:[]
+    }
    
 
     try {
@@ -114,16 +140,35 @@ const createEmployee = async (req , res) => {
 
             )
 
+            if (result.rows.length > 0){
 
-              res.status(201).json(result.rows[0])
+                   response.status = "sucessfull";
+                   response.message = "Employee Created Sucesfully"
+                   response.data = result.rows[0]
+                   res.status(201).json(response)
+            }
+            else{
+
+                   response.status = "fail";
+                   response.message = "Failed to create employee"
+                   res.status(200).json(response)
+            }
+            console.log("Result =======>",result);
+            
+            
+             
 
     }
     catch(error){
+
+        
         
         console.log('Error========>',error)
-        res.status(500).json({
-            message:"Failed to create employee"
-        })
+      
+        response.status = "fail";
+        response.message = "Failed to create employee"
+
+        res.status(200).json(response)
     }
 }    
 
