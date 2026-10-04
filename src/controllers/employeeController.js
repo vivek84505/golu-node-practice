@@ -175,6 +175,12 @@ const createEmployee = async (req , res) => {
 
 const updateEmployee = async (req, res) =>{
 
+     response = {
+        status : "",
+        message : "",
+        data:[]
+    }
+
     try{
 
         const {id} = req.params
@@ -219,26 +225,35 @@ const updateEmployee = async (req, res) =>{
                 ]
             )
 
+            console.log("Put API result ====>",result)
 
+            if(result.rows.length > 0 && result.rowCount > 0){
+               
+                response.status = "sucessfull";
+                response.message = "Data Updated Sucesfully"
+                response.data = result.rows[0]
+                res.status(200).json(response)
 
-            if(result.rows.length === 0){
-                return res.status(404).json({
-                    message:"Employee not Found"
-                })
+                
+            }
+            else {
+
+                response.status = "fail";
+                response.message = "Something went Wrong"             
+                res.status(200).json(response)
             }
 
 
 
-            res.status(200).json(result.rows[0])
+            // res.status(200).json(result.rows[0])
 
 
     }   
     catch(error){
 
-        console.log('error=======>',error)
-        res.status(500).json({
-            message:"Failed to update employee"
-        })
+            response.status = "fail";
+            response.message = "Something went Wrong"             
+            res.status(200).json(response)
     }
 }
 
